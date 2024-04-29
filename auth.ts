@@ -9,8 +9,6 @@ declare module "next-auth" {
   interface Session {
     user: {
       role: "ADMIN" | "USER";
-      hello: string;
-      ny: string;
     } & DefaultSession["user"];
   }
 }
@@ -23,9 +21,29 @@ declare module "next-auth/jwt" {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  events: {
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          emailVerified: new Date(),
+        },
+      });
+    },
+  },
   callbacks: {
+    // async signIn({ user }) {
+    //   if (user.id) {
+    //     const existingUser = await getUserById(user.id);
+    //     if (!existingUser || !existingUser.emailVerified) {
+    //       return false;
+    //     }
+    //   }
+    //
+    //   return true;
+    // },
     async session({ session, token }) {
-      console.log("sessionToklen", token);
+      // console.log("sessionToklen", token);
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
