@@ -1,5 +1,8 @@
 "use server";
 import { signIn } from "@/auth";
+import { generateVerificationToken } from "@/data/tokens";
+import { getUserByEmail } from "@/data/user";
+import { sendVerificationEmail } from "@/lib/email";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { LoginSchema } from "@/schemas";
 import { AuthError } from "next-auth";
@@ -21,6 +24,23 @@ export const login = async (
   }
 
   const { email, password } = validateFields.data;
+  const existingUser = await getUserByEmail(email);
+
+  if (!existingUser || !existingUser.email || !existingUser.password) {
+    return { error: "Invalid Credentials", success: "" };
+  }
+
+  if (!existingUser.emailVerified) {
+    const verificationToken = await generateVerificationToken(
+      existingUser.email,
+    );
+
+    await sendVerificationEmail(
+      verificationToken.email,
+      verificationToken.token,
+    );
+    return { success: "Confirmation email sent!" };
+  }
 
   try {
     await signIn("credentials", {

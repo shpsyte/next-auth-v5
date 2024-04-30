@@ -21,6 +21,10 @@ declare module "next-auth/jwt" {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  pages: {
+    signIn: "/auth/login",
+    error: "/auth/error",
+  },
   events: {
     async linkAccount({ user }) {
       await db.user.update({
@@ -32,16 +36,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
   callbacks: {
-    // async signIn({ user }) {
-    //   if (user.id) {
-    //     const existingUser = await getUserById(user.id);
-    //     if (!existingUser || !existingUser.emailVerified) {
-    //       return false;
-    //     }
-    //   }
-    //
-    //   return true;
-    // },
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") {
+        return true;
+      }
+
+      // prevent login if email is not verified
+      if (user.id) {
+        const existingUser = await getUserById(user.id);
+        if (!existingUser || !existingUser.emailVerified) {
+          return false;
+        }
+      }
+
+      return true;
+    },
     async session({ session, token }) {
       // console.log("sessionToklen", token);
       if (token.sub && session.user) {
@@ -56,7 +65,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!token.sub) return token;
       const user = await getUserById(token.sub);
       if (!user) return token;
-      token.role = user.role;
+      if (user.role) {
+        token.role = user.role;
+      }
       return token;
     },
   },
