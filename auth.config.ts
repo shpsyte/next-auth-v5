@@ -3,11 +3,16 @@ import { LoginSchema } from "./schemas";
 import bcrypt from "bcryptjs";
 import Github from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import Resend from "next-auth/providers/resend";
 import type { NextAuthConfig } from "next-auth";
 import { getUserByEmail } from "./data/user";
+import { db } from "./lib/db";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 
 export default {
+  // adapter: PrismaAdapter(db),
   providers: [
+    // Resend,
     Github({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,

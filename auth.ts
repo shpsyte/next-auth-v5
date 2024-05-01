@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
 import { getUserById } from "./data/user";
 import { JWT } from "next-auth/jwt"; // eslint-disable-line
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmations";
 
 declare module "next-auth" {
   interface Session {
@@ -37,6 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
+      // allow oauth withiouf email verification
       if (account?.provider !== "credentials") {
         return true;
       }
@@ -46,6 +48,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const existingUser = await getUserById(user.id);
         if (!existingUser || !existingUser.emailVerified) {
           return false;
+        }
+
+        if (existingUser.isTwoFactorEnabled) {
+          const towFactorConfirmation = await getTwoFactorConfirmationByUserId(
+            existingUser.id,
+          );
+
+          if (!towFactorConfirmation) {
+            return false;
+          }
+
+          // Delete tow factor confirmation after login
+          await db.twoFactorConfirmation.delete({
+            where: {
+              id: towFactorConfirmation.id,
+            },
+          });
         }
       }
 
