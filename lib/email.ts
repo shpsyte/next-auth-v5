@@ -3,7 +3,6 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.AUTH_RESEND_KEY);
 
 export const sendTwoFactorEmail = async (email: string, token: string) => {
-  console.log("Tokne is", token);
   // send email
 };
 

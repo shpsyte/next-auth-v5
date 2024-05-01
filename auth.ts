@@ -10,6 +10,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       role: "ADMIN" | "USER";
+      isTwoFactorEnabled: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -71,12 +72,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
     async session({ session, token }) {
-      // console.log("sessionToklen", token);
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
       if (token.role && session.user) {
         session.user.role = token.role;
+      }
+      if (token.isTwoFactorEnabled && session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
       }
       return session;
     },
@@ -87,6 +90,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user.role) {
         token.role = user.role;
       }
+      token.isTwoFactorEnabled = user.isTwoFactorEnabled;
       return token;
     },
   },

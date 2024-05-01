@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 export default function UserButtom() {
   const user = useCurrentUser();
 
-  console.log(user);
   return (
     <>
       <DropdownMenu>

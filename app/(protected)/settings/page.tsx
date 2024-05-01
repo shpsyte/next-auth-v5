@@ -16,7 +16,12 @@ export default function SettingPage() {
     <div>
       <span className="font-bold">My protected page</span>
       <p>teste</p>
-      <Image width={120} height={120} src={user?.image} alt="User Avatar" />
+      <Image
+        width={120}
+        height={120}
+        src={user?.image || ""}
+        alt="User Avatar"
+      />
       <p className="min-h-40">{JSON.stringify(user, null, 2)}</p>
 
       {/* <form */}
