@@ -1,6 +1,6 @@
 "use client";
 
-import UserBottom from "@/components/auth/user-botton";
+import UserButtom from "@/components/auth/user-botton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -38,7 +38,7 @@ export default function NavBar() {
           </Button>
         </div>
         <p>
-          <UserBottom />
+          <UserButtom />
         </p>
       </nav>
     </>
