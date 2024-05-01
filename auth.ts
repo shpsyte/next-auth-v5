@@ -5,12 +5,14 @@ import { db } from "./lib/db";
 import { getUserById } from "./data/user";
 import { JWT } from "next-auth/jwt"; // eslint-disable-line
 import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmations";
+import { getAccountByUserid } from "./data/account";
 
 declare module "next-auth" {
   interface Session {
     user: {
       role: "ADMIN" | "USER";
       isTwoFactorEnabled: boolean;
+      isOAuth: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -87,6 +89,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (token.email) {
           session.user.email = token.email;
         }
+        session.user.isOAuth = token.isOAuth as boolean;
       }
       return session;
     },
@@ -94,6 +97,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!token.sub) return token;
       const user = await getUserById(token.sub);
       if (!user) return token;
+
+      const existingAccout = await getAccountByUserid(user.id);
+
+      token.isOAuth = !!existingAccout;
+
       if (user.role) {
         token.role = user.role;
       }

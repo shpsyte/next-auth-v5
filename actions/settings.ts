@@ -19,6 +19,13 @@ export const settings = async (values: z.infer<typeof SettingsSchema>) => {
     return { error: "user not found" };
   }
 
+  if (user.isOAuth) {
+    delete values.email;
+    delete values.password;
+    delete values.newPassword;
+    delete values.isToEnableTwoFactor;
+  }
+
   await db.user.update({
     where: { id: user.id },
     data: {
