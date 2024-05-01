@@ -81,6 +81,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.isTwoFactorEnabled && session.user) {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
       }
+
+      if (session.user) {
+        session.user.name = token.name;
+        if (token.email) {
+          session.user.email = token.email;
+        }
+      }
       return session;
     },
     async jwt({ token }) {
@@ -91,6 +98,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role;
       }
       token.isTwoFactorEnabled = user.isTwoFactorEnabled;
+      token.name = user.name;
+      token.email = user.email;
       return token;
     },
   },
